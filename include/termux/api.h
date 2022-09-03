@@ -149,6 +149,23 @@ int termux_fingerprint(char *title, char *description, char *subtitle, char *can
 /*!
  @retval ~0 failure
 */
+int termux_sensor_cleanup(void);
+
+/*!
+ @retval >=0 number
+ @retval ~0 failure
+*/
+int termux_sensor_list(char ***sensor);
+
+/*!
+ @retval >=0 number
+ @retval ~0 failure
+*/
+int termux_sensor(char *sensor, double **values);
+
+/*!
+ @retval ~0 failure
+*/
 int termux_toast(char *text, char *text_color, char *background, int gravity);
 
 /*!

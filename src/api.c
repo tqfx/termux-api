@@ -876,6 +876,79 @@ int termux_fingerprint(char *title, char *description, char *subtitle, char *can
     return ok;
 }
 
+int termux_sensor_cleanup(void)
+{
+    int argc = 4;
+    char *argv[5] = {0, "Sensor", "-a", "cleanup", 0};
+    return pipe_exec(argc, argv, 1000);
+}
+
+int termux_sensor_list(char ***sensor)
+{
+    int ok = ~0;
+    int argc = 4;
+    char *argv[5] = {0, "Sensor", "-a", "list", 0};
+    json_t *root = read_json(argc, argv);
+    if (root)
+    {
+        json_t *object = json_object_get(root, "sensors");
+        if (object)
+        {
+            size_t n = json_array_size(object);
+            if (n)
+            {
+                *sensor = (char **)malloc(sizeof(char *) * n);
+            }
+            for (size_t i = 0; i != n; ++i)
+            {
+                json_t *item = json_array_get(object, i);
+                (*sensor)[i] = strdup(json_string_value(item));
+            }
+            ok = (int)n;
+        }
+        json_decref(root);
+    }
+    return ok;
+}
+
+int termux_sensor(char *sensor, double **values)
+{
+    int ok = ~0;
+    int argc = 10;
+    char *argv[11] = {0, "Sensor", "-a", "sensors", "--es", "sensors", sensor, "--ei", "limit", "1", 0};
+    json_t *root = read_json(argc, argv);
+    if (root)
+    {
+        json_t *object = json_object_get(root, sensor);
+        if (object == 0)
+        {
+            goto done;
+        }
+        object = json_object_get(object, "values");
+        if (object == 0)
+        {
+            goto done;
+        }
+        size_t n = json_array_size(object);
+        if (n)
+        {
+            *values = (double *)malloc(sizeof(double) * n);
+        }
+        for (size_t i = 0; i != n; ++i)
+        {
+            json_t *item = json_array_get(object, i);
+            if (json_is_number(item))
+            {
+                (*values)[i] = json_number_value(item);
+            }
+        }
+        ok = (int)n;
+    done:
+        json_decref(root);
+    }
+    return ok;
+}
+
 int termux_toast(char *text, char *text_color, char *background, int gravity)
 {
     int argc = 2;
