@@ -7,7 +7,6 @@
 #include "termux/api.h"
 
 #include <stdio.h>
-#include <limits.h>
 
 int main(void)
 {

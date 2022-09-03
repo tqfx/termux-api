@@ -247,6 +247,11 @@ __attribute__((unused)) static int api_putc(const api_s *ctx, int c)
     return fputc(c, ctx->wr);
 }
 
+__attribute__((unused)) static int api_puts(const api_s *ctx, const char *str)
+{
+    return fputs(str, ctx->wr);
+}
+
 __attribute__((unused)) static size_t api_read(const api_s *ctx, void *data, size_t byte)
 {
     return fread(data, 1, byte, ctx->rd);
@@ -255,6 +260,16 @@ __attribute__((unused)) static size_t api_read(const api_s *ctx, void *data, siz
 __attribute__((unused)) static size_t api_write(const api_s *ctx, const void *data, size_t byte)
 {
     return fwrite(data, 1, byte, ctx->wr);
+}
+
+__attribute__((unused)) static int __attribute__((format(printf, 2, 3))) api_printf(const api_s *ctx, const char *fmt, ...)
+{
+    int stats;
+    va_list va;
+    va_start(va, fmt);
+    stats = vfprintf(ctx->wr, fmt, va);
+    va_end(va);
+    return stats;
 }
 
 __attribute__((unused)) static void argv_display(char *const argv[])
@@ -859,6 +874,52 @@ int termux_fingerprint(char *title, char *description, char *subtitle, char *can
         json_decref(root);
     }
     return ok;
+}
+
+int termux_toast(char *text, char *text_color, char *background, int gravity)
+{
+    int argc = 2;
+    char *argv[15] = {0, "Toast"};
+    if (gravity & TERMUX_TOAST_SHORT)
+    {
+        argv[argc++] = "--ez";
+        argv[argc++] = "short";
+        argv[argc++] = "true";
+    }
+    if (text_color)
+    {
+        argv[argc++] = "--es";
+        argv[argc++] = "text_color";
+        argv[argc++] = text_color;
+    }
+    if (background)
+    {
+        argv[argc++] = "--es";
+        argv[argc++] = "background";
+        argv[argc++] = background;
+    }
+    gravity &= 0x3;
+    if (gravity)
+    {
+        char *map[] = {"middle", "top", "middle", "bottom"};
+        argv[argc++] = "--es";
+        argv[argc++] = "gravity";
+        argv[argc++] = map[gravity];
+    }
+    argv[argc] = 0;
+    api_s ctx[1];
+    int ok = api_open(ctx, argc, argv);
+    api_printf(ctx, "%s\n", text);
+    api_wait(ctx, 300);
+    api_close(ctx);
+    return ok;
+}
+
+int termux_torch(int enabled)
+{
+    int argc = 5;
+    char *argv[6] = {0, "Torch", "--ez", "enabled", enabled ? "1" : "0", 0};
+    return pipe_exec(argc, argv, 1000);
 }
 
 int termux_vibrate(int ms, int force)

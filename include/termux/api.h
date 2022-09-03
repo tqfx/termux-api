@@ -18,6 +18,14 @@ enum
     TERMUX_DIALOG_P = (1 << 2), //!< numeric
 };
 
+enum
+{
+    TERMUX_TOAST_TOP = 1, //!< top
+    TERMUX_TOAST_MID = 2, //!< middle
+    TERMUX_TOAST_BOT = 3, //!< bottom
+    TERMUX_TOAST_SHORT = 1 << 4, //!< short
+};
+
 typedef struct termux_volume_s
 {
     struct
@@ -137,6 +145,16 @@ int termux_dialog_time(char *title);
  @retval 2 unknown
 */
 int termux_fingerprint(char *title, char *description, char *subtitle, char *cancel);
+
+/*!
+ @retval ~0 failure
+*/
+int termux_toast(char *text, char *text_color, char *background, int gravity);
+
+/*!
+ @retval ~0 failure
+*/
+int termux_torch(int enabled);
 
 /*!
  @retval ~0 failure
