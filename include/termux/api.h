@@ -73,6 +73,12 @@ int termux_init(void);
 void termux_exit(void);
 
 /*!
+ @param[in] brightness 0~255
+ @retval ~0 failure
+*/
+int termux_brightness(int brightness);
+
+/*!
  @retval 0 success
 */
 int termux_clipboard_get(char **data, size_t *byte);

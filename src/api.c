@@ -370,6 +370,23 @@ void termux_exit(void)
     pipe_close(ctx);
 }
 
+int termux_brightness(int brightness)
+{
+    int argc = 8;
+    char buff[10] = {'0', 0};
+    char *argv[9] = {0, "Brightness", "--ei", "brightness", buff, "--ez", "auto", 0, 0};
+    if (brightness > ~0)
+    {
+        snprintf(buff, 10, "%i", brightness);
+        argv[7] = "0";
+    }
+    else
+    {
+        argv[7] = "1";
+    }
+    return pipe_exec(argc, argv, 1000);
+}
+
 int termux_clipboard_get(char **data, size_t *byte)
 {
     int argc = 2;
